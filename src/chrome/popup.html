@@ -1,0 +1,143 @@
+<html>
+<head>
+<style>
+	form {
+		padding: 0px;
+		margin: 0px;
+	}
+	ul {
+		list-style: none;
+		padding-left: 0px;
+		margin-left: 0px;
+	}
+	li {
+		margin-left: 0px;
+		padding-left: 0px;
+		font-size: 8pt;
+		white-space: pre;
+	}
+</style>	
+<script>
+	/*
+		this page is terrible atm because I need to clean it up:
+		@todo 	clean this up
+	*/
+
+	function get_host (url) {
+		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
+		return url.match(re)[1].toString().toLowerCase();
+	}
+
+	function $(elm) {
+		return document.getElementById(elm);
+	}
+	
+	function unblock() {
+		unblock_i_has = false;
+		unblk = [];
+		blk = [];
+		lst = document.getElementsByName('list');
+		for (i = 0; i < lst.length; i++) {
+			if(lst[i].checked) {
+				unblock_i_has = true;
+				unblk.push(lst[i].value);
+			} else {
+				blocked_i_has = true;
+				blk.push(lst[i].value);
+			}
+		}
+		if(unblock_i_has)
+			chrome.extension.getBackgroundPage().setUnblocked(unblk);
+		if(blocked_i_has)
+			chrome.extension.getBackgroundPage().setBlocked(blk);
+		chrome.extension.getBackgroundPage().tabRefresh();
+		window.close();
+		return false;
+	}
+	
+	function render() {
+		
+		bl = chrome.extension.getBackgroundPage().getBlockList();
+		count = 0;
+		
+		console.log('block list', bl);
+		
+		var c = document.getElementById('count');
+		var cont = document.getElementById('blocked_items');
+	
+		tmpScript = "<ul class=\"script_list\">";
+		tmpCss = "<ul class=\"css_list\">";
+		tmpImg = "<ul class=\"img_list\">";
+		tmpOther = "<ul class=\"other_list\">";
+		
+		haveScript = 0;
+		haveCss = 0;
+		haveImg = 0;
+		haveOther = 0;
+		
+		for(block in bl) {
+			tmp = "";
+			tmp += "<li>";
+			tmp += "<input type=\"checkbox\" name=\"list\" "
+			if(bl[block].blocked == false) {
+				tmp+= " CHECKED ";
+			}
+			console.log('blo?', bl[block]);
+			tmp += " value=\"" + get_host(block) + "\"> ";
+			tmp += get_host(block).substr(0, 24);
+			tmp += "</li>";
+			count++;
+			
+			switch(bl[block].type) {
+				case 'IMG':
+					haveImg++;
+					tmpImg += tmp;
+					break;
+				case 'SCRIPT':
+					haveScript++;
+					tmpScript += tmp;
+					break;
+				case 'LINK':
+					haveCss++;
+					tmpCss += tmp;
+					break;
+				default:
+					haveOther++;
+					tmpOther += tmp;
+					break;
+			}
+		}
+
+		tmpScript = "<h3>" + haveScript + " script objects</h3>" + tmpScript + "</ul>";
+		tmpCss = "<h3>" + haveCss + " css objects</h3>" + tmpCss + "</ul>";
+		tmpImg = "<h3>" + haveImg + " image objects</h3>" + tmpImg + "</ul>";
+		tmpOther = "<h3>" + haveOther + " other objects</h3>" + tmpOther + "</ul>";
+
+		fullListRender = "<form name=\"unblock_form\">";
+		if(haveScript > 0) 
+			fullListRender += tmpScript;
+		if(haveCss > 0) 
+			fullListRender += tmpCss;
+		if(haveImg > 0) 
+			fullListRender += tmpImg;
+		if(haveOther > 0) 
+			fullListRender += tmpOther;
+						
+		fullListRender += "<p><button value=\"unblock checked\" onClick=\"javascript:unblock();return false;\">update block list</button></form>";
+		c.innerHTML = count + "";
+		cont.innerHTML = fullListRender;
+	}
+	
+	chrome.tabs.onSelectionChanged.addListener(function(tabId, selectInfo) {
+		window.close();
+	});
+	
+</script>
+</head>
+<body onload="render()">
+	<h3><span id="count"></span> 3rd-Party Items Found:</h3>
+	<p><i>(Check items you want to allow to load and click 'update block list')</i></p>
+	<div id="blocked_items">
+		
+	</div>	
+</body>

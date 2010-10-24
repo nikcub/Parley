@@ -1,0 +1,103 @@
+<script>
+
+var blockList = {};
+var curTab;
+var curTabUrl;
+var curTabFav;
+
+function getStorage(key) {
+	var result = localStorage[key];
+	if(typeof(result) == "undefined")
+		return ['___z'];
+	else
+		return JSON.parse(result);
+}
+
+function setStorage(key, value) {
+	localStorage[key] = JSON.stringify(value);
+}
+
+function onRequest(request, sender, sendResponse) {
+	if(request == "blocklist")
+		sendResponse(getStorage('unblocked.hosts'));
+	else {
+		chrome.pageAction.show(sender.tab.id);
+		// console.log(request);
+		for (x in request) {
+			if(!blockList.hasOwnProperty(x)) {
+				blockList[x] = {};
+			}
+			for(y in request[x]) {
+				if(!blockList[x].hasOwnProperty(y)) {
+					blockList[x][y] = {};
+				}
+				blockList[x][y] = request[x][y];
+			}
+
+		}		
+	}	
+
+	// console.log('Storing for', request['host'], request['info']);
+	// blockList[request['host']] = blockList[request['info']];
+}
+
+function get_host (url) {
+	var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
+	return url.match(re)[1].toString().toLowerCase();
+}
+
+function getBlockList() {
+	
+	// console.log('get blolist for:', curTabUrl, blockList[curTabUrl]);
+	// console.log(blockList);
+	if(blockList.hasOwnProperty(curTabUrl)) {
+		return blockList[curTabUrl];
+	} else {
+		// console.log('errr no blozor for the roxor at ', url);
+		return false;
+	}
+}
+
+function updateTab(tab) {
+	curTab = tab;
+	curTabUrl = tab.url;
+	curTabFav = tab.favIconUrl;
+}
+
+function setUnblocked(unblk) {
+	curBlocked = getStorage('unblocked.hosts');
+	for(b in unblk) {
+		if(curBlocked.indexOf(unblk[b]) < 0)
+			curBlocked.push(unblk[b]);
+	}
+	setStorage('unblocked.hosts', curBlocked);
+	blockList = curBlocked;
+}
+
+function setBlocked(unblk) {
+	curBlocked = getStorage('unblocked.hosts');
+	for(b in unblk) {
+		if(curBlocked.indexOf(unblk[b]) > 0) {
+			ind = curBlocked.indexOf(unblk[b]);
+			curBlocked.splice(ind, 1);
+		}
+	}
+	setStorage('unblocked.hosts', curBlocked);
+	blockList = curBlocked;
+}
+
+function tabRefresh() {
+	console.log('refresh');
+	console.log(curTab);
+}
+// this entire section took too long to figure out.
+// @todo  write a blog post to warn others 
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
+	chrome.tabs.getSelected(null, updateTab);
+});
+
+chrome.tabs.getSelected(null, updateTab);
+chrome.extension.onRequest.addListener(onRequest);
+
+</script>
+ 
