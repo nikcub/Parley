@@ -1,7 +1,7 @@
 {
 	"name": "Parley",
 	"version": "0.0.1",
-	"description": "Blocks all third-party cookies for a better, safer and more private web experience",
+	"description": "Blocks third-party requests and cookies for a cleaner, safer and more private web experience",
 	"background_page": "background.html",
 	"options_page": "options.html",
 	"update_url": "http://clients2.google.com/service/update2/crx",
@@ -15,12 +15,13 @@
 		}
 	],
 	"page_action": {
-		"default_icon": "sandwich-19.png",
+		"default_icon": "img/parley-block-19.png",
 		"default_title": "3rd party content blocked",
 		"popup": "popup.html"
 	},
 	"icons" : {
-		"48" : "sandwich-48.png",
-		"128" : "sandwich-128.png"
+		"19" : "img/parley-19.png",
+		"48" : "img/parley-48.png",
+		"128" : "img/parley-128.png"
 	}	
 }

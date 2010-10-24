@@ -1,5 +1,14 @@
-# Parlay
+# Parley
 
 The browser privacy plugin
 
-Blocks all third-party requests and cookies for a better, safer and more private web experience
+Blocks third-party requests and cookies for a cleaner, safer and more private web experience
+
+
+@TODO 	options page
+@todo 	options - settings showing common unblock rules by type and by site (eg. disqus, facebook, digg etc. show buttons/etc.)
+@TODO	options - more options to unblock certain types of content
+@TODO 	options - unblock entire sites/domains
+@TODO	options - always block cookies for css
+
+@TODO	malware lookups on other DBs
