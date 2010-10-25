@@ -62,7 +62,7 @@
 						html: event.target.outerHTML
 					};
 					this.chromeSender('addBlock', blockEvent, function () { });
-					// this.chromeSender('showPageAction', '', function() { });
+					this.chromeSender('showPageAction');
 					event.preventDefault();
 
 				// }
