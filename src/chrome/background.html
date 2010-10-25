@@ -14,9 +14,6 @@ ParleyBg = {
 	
 	init: function() {
 		chrome.extension.onRequest.addListener(this.chromeListener);
-		// chrome.tabs.onUpdated.addListener(this.chromeTabListener);
-		// chrome.tabs.getSelected(null, this.chromeTabUpdate);
-
 		chrome.tabs.onUpdated.addListener(this.chromeTabUpdate);
 		chrome.tabs.getSelected(null, this.chromeTabUpdate);
 	},
