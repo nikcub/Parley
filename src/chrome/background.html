@@ -30,8 +30,6 @@ ParleyBg = {
 	
 	chromeListener: function(request, sender, sendResponse) { 
 		var result = ParleyBg[request.rec](request.msg, sender);
-		
-		console.log('Sending: ', result);
 		sendResponse(result, 'ttt');
 	},
 
@@ -137,9 +135,6 @@ blockList = {
 ParleyBg.init.prototype = ParleyBg;
 blockList.init.prototype = blockList;
 
-function getBlockList() {
-	return blockList;
-}
 
 // try {
 	// Parley = window.Parley = {};
