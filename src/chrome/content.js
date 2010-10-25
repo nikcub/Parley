@@ -102,10 +102,6 @@
 			return (Url.substr(0, sub.length) != Host.substr(0, sub.length));
 		},
 		
-		isMatching: function (url, domain) {
-		  return url.toLowerCase().indexOf(domain, 7) >= 7;
-		},
-		
 		/**
 			Extract host from URL.
 			
