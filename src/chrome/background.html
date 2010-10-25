@@ -1,103 +1,178 @@
 <script>
 
-var blockList = {};
-var curTab;
-var curTabUrl;
-var curTabFav;
+(function (document) {
 
-function getStorage(key) {
-	var result = localStorage[key];
-	if(typeof(result) == "undefined")
-		return ['___z'];
-	else
-		return JSON.parse(result);
-}
+// @todo 	get from cotnentscritp
+// Parley = {};
 
-function setStorage(key, value) {
-	localStorage[key] = JSON.stringify(value);
-}
-
-function onRequest(request, sender, sendResponse) {
-	if(request == "blocklist")
-		sendResponse(getStorage('unblocked.hosts'));
-	else {
-		chrome.pageAction.show(sender.tab.id);
-		// console.log(request);
-		for (x in request) {
-			if(!blockList.hasOwnProperty(x)) {
-				blockList[x] = {};
-			}
-			for(y in request[x]) {
-				if(!blockList[x].hasOwnProperty(y)) {
-					blockList[x][y] = {};
-				}
-				blockList[x][y] = request[x][y];
-			}
-
-		}		
-	}	
-
-	// console.log('Storing for', request['host'], request['info']);
-	// blockList[request['host']] = blockList[request['info']];
-}
-
-function get_host (url) {
-	var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
-	return url.match(re)[1].toString().toLowerCase();
-}
-
-function getBlockList() {
+ParleyBg = {
 	
-	// console.log('get blolist for:', curTabUrl, blockList[curTabUrl]);
-	// console.log(blockList);
-	if(blockList.hasOwnProperty(curTabUrl)) {
-		return blockList[curTabUrl];
-	} else {
-		// console.log('errr no blozor for the roxor at ', url);
-		return false;
+	blockList: {},
+	curTab: null,
+	curTabUrl: null,
+	curTabFav: null,
+	
+	init: function() {
+		chrome.extension.onRequest.addListener(this.chromeListener);
+		// chrome.tabs.onUpdated.addListener(this.chromeTabListener);
+		// chrome.tabs.getSelected(null, this.chromeTabUpdate);
+
+		chrome.tabs.onUpdated.addListener(this.chromeTabUpdate);
+		chrome.tabs.getSelected(null, this.chromeTabUpdate);
+	},
+	
+	chromeTabUpdate: function(tab) {
+		this.curTab = tab;
+		this.curTabUrl = tab.url;
+		this.curTabFav = tab.favIconUrl;
+	},
+	
+	chromeTabListener: function(tabId, changeInfo) {
+		chrome.tabs.getSelected(null, this.chromeTabUpdate);
+	},
+	
+	chromeListener: function(request, sender, sendResponse) { 
+		var result = ParleyBg[request.rec](request.msg, sender);
+		
+		console.log('Sending: ', result);
+		sendResponse(result, 'ttt');
+	},
+
+	chromeSender: function(rec, message, callback) {
+		chrome.extension.sendRequest({rec: rec, msg: msg}, callback);
+	},
+	
+	blocklist: function() {
+		return this.getStorage('unblocked.hosts');
+	},
+	
+	addBlock: function(block, sender) {
+		console.log('adding block');
+		console.log(block);
+		// for (x in request) {
+		// 	if(!blockList.hasOwnProperty(x)) {
+		// 		blockList[x] = {};
+		// 	}
+		// 	for(y in request[x]) {
+		// 		if(!blockList[x].hasOwnProperty(y)) {
+		// 			blockList[x][y] = {};
+		// 		}
+		// 		blockList[x][y] = request[x][y];
+		// 	}
+		// 
+		// }
+	},
+	
+	echo: function(test) {
+		return test;
+	},
+	
+	getTest: function(test) {
+		return 'test message';
+	},
+	
+	getBlockList: function() {
+		console.log('Called getBlockList');
+		console.log(blockList.listForHost(document.domain));
+		return blockList.listForHost(document.domain);
+	},
+	
+	showPageAction: function(nothing, sender) {
+		console.log('got show page action', nothing, sender);
+		chrome.pageAction.show(sender.tab.id);
+	},
+	
+	get_host: function(url) {
+		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
+		return url.match(re)[1].toString().toLowerCase();
+	},
+	
+	getStorage: function(key) {
+		var result = localStorage[key];
+		if(typeof(result) == "undefined")
+			return [''];
+		else
+			return JSON.parse(result);
+	},
+
+	setStorage: function(key, value) {
+		localStorage[key] = JSON.stringify(value);
 	}
-}
+};
 
-function updateTab(tab) {
-	curTab = tab;
-	curTabUrl = tab.url;
-	curTabFav = tab.favIconUrl;
-}
-
-function setUnblocked(unblk) {
-	curBlocked = getStorage('unblocked.hosts');
-	for(b in unblk) {
-		if(curBlocked.indexOf(unblk[b]) < 0)
-			curBlocked.push(unblk[b]);
-	}
-	setStorage('unblocked.hosts', curBlocked);
-	blockList = curBlocked;
-}
-
-function setBlocked(unblk) {
-	curBlocked = getStorage('unblocked.hosts');
-	for(b in unblk) {
-		if(curBlocked.indexOf(unblk[b]) > 0) {
-			ind = curBlocked.indexOf(unblk[b]);
-			curBlocked.splice(ind, 1);
+blockList = {
+	
+	store: {},
+	
+	init: function() {
+		// not a lot
+		this.store['______z'] = {};
+	},
+	
+	listForHost: function(host) {
+		return this.getStorage('unblocked.' + host);
+	},
+	
+	globalUnblock: function() {
+		return this.getStorage('unblocked.global');
+	},
+	
+	setUnblocked: function(unblk) {
+		curBlocked = ParleyBg.getStorage('unblocked.hosts');
+		for(b in unblk) {
+			if(curBlocked.indexOf(unblk[b]) < 0)
+				curBlocked.push(unblk[b]);
 		}
+		ParleyBg.setStorage('unblocked.hosts', curBlocked);
+		this.store = curBlocked;
+	},
+
+	setBlocked: function(unblk) {
+		curBlocked = ParleyBg.getStorage('unblocked.hosts');
+		for(b in unblk) {
+			if(curBlocked.indexOf(unblk[b]) > 0) {
+				ind = curBlocked.indexOf(unblk[b]);
+				curBlocked.splice(ind, 1);
+			}
+		}
+		ParleyBg.setStorage('unblocked.hosts', curBlocked);
+		this.store = curBlocked;
+	},
+	
+	get_host: function(url) {
+		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
+		return url.match(re)[1].toString().toLowerCase();
+	},
+	
+	getStorage: function(key) {
+		var result = localStorage[key];
+		if(typeof(result) == "undefined")
+			return [''];
+		else
+			return JSON.parse(result);
+	},
+
+	setStorage: function(key, value) {
+		localStorage[key] = JSON.stringify(value);
 	}
-	setStorage('unblocked.hosts', curBlocked);
-	blockList = curBlocked;
-}
+};
 
-function tabRefresh() {
-	console.log('refresh');
-	console.log(curTab);
-}
-// this entire section took too long to figure out.
-// @todo  write a blog post to warn others 
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
-	chrome.tabs.getSelected(null, updateTab);
-});
+ParleyBg.init.prototype = ParleyBg;
+blockList.init.prototype = blockList;
 
-chrome.tabs.getSelected(null, updateTab);
-chrome.extension.onRequest.addListener(onRequest);
+// try {
+	// Parley = window.Parley = {};
+	ParleyBg = new ParleyBg.init();
+	blockList = new blockList.init();
+	
+
+	
+// } catch(Error) {
+	// console.error('Error: ' + arguments[0] + ' ' + Error.message);
+	// console.error(Error.stack);
+// }
+
+})(document);
 
 </script>
  

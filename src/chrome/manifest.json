@@ -4,7 +4,6 @@
 	"description": "Blocks third-party requests and cookies for a cleaner, safer and more private web experience",
 	"background_page": "background.html",
 	"options_page": "options.html",
-	"update_url": "http://clients2.google.com/service/update2/crx",
 	"permissions": ["tabs", "http://*/*", "https://*/*"],
 	"content_scripts": [
 		{

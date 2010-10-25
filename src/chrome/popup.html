@@ -3,17 +3,59 @@
 <style>
 	body {
 		width: 320px;
-		border: 1px solid red;
+		font-family: Helvetica, Arial, sans-serif;
+		font-size: 11px;
+		letter-spacing: 0.5px;
+		word-spacing: 0.5px;
 	}
+	
+	button {
+		white-space: nowrap;
+		overflow: hidden;
+	    background: #eee;
+		text-align: left;
+		color: #369;
+	    cursor: pointer;
+		border: 1px solid silver;
+		width: 150px;
+		height: 20px;
+		font-size: 9px;
+		line-height: 16px;
+		padding-top: 1px;
+		padding-bottom: 1px;
+		margin: 0px;
+		padding-left: 0px;
+		border: 1px outset;
+	}
+
+	button > img {
+		margin: 0;
+		padding: 0;
+		margin-left: 1px;
+		margin-right: 2px;
+		float: left;
+		height: 16px;
+		width: 16px;
+		line-height: 18px;
+		margin-top: 0px;
+	}
+
+	button.down {
+	    background: #FFcccc;
+		border: 1px inset;
+	}
+	
 	form {
 		padding: 0px;
 		margin: 0px;
 	}
+	
 	ul {
 		list-style: none;
 		padding-left: 0px;
 		margin-left: 0px;
 	}
+	
 	li {
 		margin-left: 0px;
 		padding-left: 0px;
@@ -34,6 +76,19 @@
 
 	function $(elm) {
 		return document.getElementById(elm);
+	}
+	
+	function runit() {
+		var btn = document.getElementById('button');
+		btn.onclick = toggleButton;
+		if (btn.captureEvents) {
+			btn.captureEvents(Event.CLICK);
+		}
+	}
+	
+	function toggleButton(event) {
+		var cn = event.target.className;
+		event.target.className = (cn == "") ? 'down' : "";
 	}
 	
 	function unblock() {
@@ -62,6 +117,7 @@
 	function render() {
 		
 		bl = chrome.extension.getBackgroundPage().getBlockList();
+		console.log(bl);
 		count = 0;
 		
 		console.log('block list', bl);
@@ -82,7 +138,7 @@
 		for(block in bl) {
 			tmp = "";
 			tmp += "<li>";
-			tmp += "<input type=\"checkbox\" name=\"list\" "
+			tmp += "<input type=\"checkbox\" name=\"list\" ";
 			if(bl[block].blocked == false) {
 				tmp+= " CHECKED ";
 			}
@@ -112,10 +168,10 @@
 			}
 		}
 
-		tmpScript = "<h3>" + haveScript + " script objects</h3>" + tmpScript + "</ul>";
-		tmpCss = "<h3>" + haveCss + " css objects</h3>" + tmpCss + "</ul>";
-		tmpImg = "<h3>" + haveImg + " image objects</h3>" + tmpImg + "</ul>";
-		tmpOther = "<h3>" + haveOther + " other objects</h3>" + tmpOther + "</ul>";
+		tmpScript = "<p><b>" + haveScript + " script objects</b></p>" + tmpScript + "</ul>";
+		tmpCss = "<p><b>" + haveCss + " css objects</b></p>" + tmpCss + "</ul>";
+		tmpImg = "<p><b>" + haveImg + " image objects</b></p>" + tmpImg + "</ul>";
+		tmpOther = "<p><b>" + haveOther + " other objects</b></p>" + tmpOther + "</ul>";
 
 		fullListRender = "<form name=\"unblock_form\">";
 		if(haveScript > 0) 
@@ -133,14 +189,14 @@
 	}
 	
 	chrome.tabs.onSelectionChanged.addListener(function(tabId, selectInfo) {
-		window.close();
+		// window.close();
 	});
 	
 </script>
 </head>
 <body onload="render()">
-	<h3><span id="count"></span> 3rd-Party Items Found:</h3>
-	<p><i>(Check items you want to allow to load and click 'update block list')</i></p>
+	<p><b><span id="count"></span> 3rd-Party Items Found:</b></p>
+	<p>The following items on this page were blocked from loading. Click on an item to toggle blocking.</p>
 	<div id="blocked_items">
 		
 	</div>	

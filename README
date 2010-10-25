@@ -10,5 +10,5 @@ Blocks third-party requests and cookies for a cleaner, safer and more private we
 @TODO	options - more options to unblock certain types of content
 @TODO 	options - unblock entire sites/domains
 @TODO	options - always block cookies for css
-
 @TODO	malware lookups on other DBs
+@TODO	cookie cleaning and common-sense blocking

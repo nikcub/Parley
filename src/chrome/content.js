@@ -1,40 +1,41 @@
 /*
-	Parley
-	
-	(c) 2010 	Nik Cubrilovic <nikcub@gmail.com>
-	
-	Blocks all third-party cookies for a better, safer and more private web experience.
-	
-	Blocking mechanism based on 'onload' event handler by Brian Kennish <byoogle@gmail.com> 
-	in his Facebook blocking plugin.
+ Parley
 
-	TODO
-	
-	@todo 	more privacy features
+ (c) 2010 	Nik Cubrilovic <nikcub@gmail.com>
+
+ Blocks all third-party cookies for a better, safer and more private web experience.
+
+ Blocking mechanism based on 'onload' event handler by Brian Kennish <byoogle@gmail.com> 
+ in his Facebook blocking plugin and also as seen in AdBlock.
 */
 
 (function (document) {
 
 	var Parley = {
 		
-		blockedList: {},
+		unblockedList: null,
+
 		debugLevel: false,
-		blockedContent: true,
-		messageSent: false,
-		curBlocked: [],
 		
 		init: function (options) {
 			if(arguments.length > 0 && options instanceof Object) {
 				this.debugLevel = options.debug;
 			}
 			
-			chrome.extension.sendRequest("blocklist", this.chromeListener);
+			this.chromeSender('getBlockList', null, function(data, second) {
+				console.log('Got unblockedList', data, second);
+				this.unblockedList = Parley.unblockedList = data;
+			});
 			document.addEventListener("beforeload", this.evLoadFilter, true);
 		},
 
-		chromeListener: function(request, sender, sendResponse) {
-			this.curBlocked = Parley.curBlocked = request;
-			console.log(this.curBlocked, 'got ');
+		chromeSender: function(rec, msg, cb) {
+			(typeof cb != 'function')
+				cb = function() { };
+			msg = msg || "";
+			// msg = JSON.stringify(msg);
+			console.log('sending', msg);
+			chrome.extension.sendRequest({rec: rec, msg: msg}, cb);
 		},
 		
 		evLoadFilter: function (event) {
@@ -44,32 +45,25 @@
 		filterCheck: function (event) {
 			
 			if(this.policyMatch(event.url)) {
-				blocked = true;
 				
 				if(this.isUnBlocked(event.url))
-					blocked = false;
+
+					console.log('blocked ', event);
 					
-				this.blockedContent = true;
-				// host = this.get_host(event.url);
-				// if(!this.blockedList.hasOwnProperty(event.url)) {
-					// I am not comfortable with this
-					// @todo 	better data structure here
-					
-					// Data structure of block list:
-					// [locations]
-					// 		[blocked items]
-					//			[blocked item info]
-					// or something like that
-					var blockInfo = {}; var host = {}; var block = {};
-					this.debug('Blocking ' + event.url);
-					blockInfo['type'] = event.target.nodeName;
-					blockInfo['html'] = event.target.outerHTML;
-					blockInfo['blocked'] = blocked;
-					host[event.url] = blockInfo;
-					block[document.location.href] = host;
-					chrome.extension.sendRequest(block, function(response) {});
-					// chrome.extension.sendRequest(this.blockedList);
+					// event.target.src='about:blank';
+					// event.target.parentElement.removeChild(event.target);	
+					// host = this.get_host(event.url);
+					// if(!this.blockedList.hasOwnProperty(event.url)) {
+
+					var blockEvent = { 
+						url: event.url,
+						type: event.target.nodeName,
+						html: event.target.outerHTML
+					};
+					this.chromeSender('addBlock', blockEvent, function () { });
+					// this.chromeSender('showPageAction', '', function() { });
 					event.preventDefault();
+
 				// }
 				
 			}
@@ -77,7 +71,12 @@
 		},
 		
 		isUnBlocked: function(url) {
-			if(this.curBlocked.indexOf(this.get_host(event.url)) > 0) {
+			if(this.unblockedList  == null || !this.unblockedList instanceof Object)
+				return false;
+				
+			console.log(this.unblockedList);
+			
+			if(this.unblockedList.indexOf(this.get_host(event.url)) > 0) {
 				return true;
 			}
 			
@@ -153,12 +152,12 @@
 	
 	Parley.init.prototype = Parley;
 	
-	try {
+	// try {
 		var options = { debug: true };
 		Parley = window.Parley = new Parley.init(options);
-	} catch(Error) {
-		console.error('Error: ' + arguments[0] + ' ' + Error.message);
-		console.error(Error.stack);
-	}
+	// } catch(Error) {
+		// console.error('Error: ' + arguments[0] + ' ' + Error.message);
+		// console.error(Error.stack);
+	// }
 		
 })(document);
