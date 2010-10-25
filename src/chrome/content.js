@@ -33,7 +33,6 @@
 			(typeof cb != 'function')
 				cb = function() { };
 			msg = msg || "";
-			// msg = JSON.stringify(msg);
 			console.log('sending', msg);
 			chrome.extension.sendRequest({rec: rec, msg: msg}, cb);
 		},
@@ -49,6 +48,8 @@
 				if(this.isUnBlocked(event.url))
 
 					console.log('blocked ', event);
+					
+					// @todo - more agressive blocking
 					
 					// event.target.src='about:blank';
 					// event.target.parentElement.removeChild(event.target);	
