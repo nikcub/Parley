@@ -99,8 +99,11 @@ blockList = {
 	},
 
 	setBlock: function(block) {
-		this.store[document.domain] = block;
-		this.setStorage('blocklist.' + document.domain, block);
+		if(!this.store.hasOwnProperty(document.domain))
+			this.store[document.domain] = [];
+		
+		this.store[document.domain].push(block);		
+		this.setStorage('blocklist.' + document.domain, this.store[document.domain]);
 	},
 	
 	getBlock: function(host) {

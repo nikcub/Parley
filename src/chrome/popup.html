@@ -116,12 +116,9 @@
 	
 	function render() {
 		
-		bl = chrome.extension.getBackgroundPage().blockList.listForHost(document.window);
-		console.log(bl);
+		bl = chrome.extension.getBackgroundPage().blockList.getBlock(document.window);
 		
 		count = 0;
-		
-		console.log('block list', bl);
 		
 		var c = document.getElementById('count');
 		var cont = document.getElementById('blocked_items');
@@ -135,6 +132,13 @@
 		haveCss = 0;
 		haveImg = 0;
 		haveOther = 0;
+		
+		for(block in bl) {
+			console.log('gpt', bl[block]);
+			
+		}
+		
+		return null;
 		
 		for(block in bl) {
 			tmp = "";
