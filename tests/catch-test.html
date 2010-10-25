@@ -1,0 +1,73 @@
+<html>
+<head>
+<style>
+body {
+	width: 320px;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 11px;
+	letter-spacing: 0.5px;
+	word-spacing: 0.5px;
+}
+
+
+</style>
+<script>
+	blockList = {};
+	
+	function runit() {
+		document.addEventListener("beforeload", evLoadFilter, true);
+	}
+	
+	function evLoadFilter(event) {
+		// if(blockList.hasOwnProperty(event.url)) {
+		// 			console.log('no blk');
+		// 			
+		// 		} else 
+		if(policyMatch(event.url)) {
+			// console.log('Blocked:', event.url);
+			
+			event.preventDefault();
+			event.target.src='';
+			event.target.parentElement.removeChild(event.target);
+			blockList[event.url] = event;
+		}
+	}
+	
+	function policyMatch(url) {
+		var Host = this.reverseString(document.location.host.toLowerCase());
+		var Url = this.reverseString(this.get_host(url));
+		var sub = (Host.length < Url.length) ? Host : Url;
+		
+		return (Url.substr(0, sub.length) != Host.substr(0, sub.length));
+	}
+	
+	function get_host(url) {
+		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
+		return url.match(re)[1].toString().toLowerCase();
+	}
+	
+	function reverseString(str) {
+		return str.split('').reverse().join('');
+	}
+	
+	function unBlock(event) {
+		for(block in blockList) {
+			// console.log(blockList[block]);
+			
+			blockList[block].target.dispatchEvent(blockList[block]);
+		}
+	}
+	runit();
+</script>
+</head>
+<body onload="">
+	<h1>Blocking Test</h1>
+	
+	<img src="parley-128.png"><br />
+	<img src="http://www.techmeme.com/img/techmeme.png"><br />
+	<img src="http://a0.twimg.com/a/1287774835/images/twitter_logo_header.png"><br />
+	<img src="http://wordpress.dev/wp-content/themes/twentyten/images/headers/path.jpg?00003"><br />
+	
+	<button id="unblock" onClick="unBlock();">unblock</button>
+</body>
+</html>
