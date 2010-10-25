@@ -4,7 +4,7 @@
 	"description": "Blocks third-party requests and cookies for a cleaner, safer and more private web experience",
 	"background_page": "background.html",
 	"options_page": "options.html",
-	"permissions": ["tabs", "http://*/*", "https://*/*"],
+	"permissions": ["cookies", "tabs", "http://*/*", "https://*/*"],
 	"content_scripts": [
 		{
 			"all_frames": true,

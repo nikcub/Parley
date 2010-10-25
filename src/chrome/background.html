@@ -15,13 +15,25 @@ ParleyBg = {
 	init: function() {
 		chrome.extension.onRequest.addListener(this.chromeListener);
 		chrome.tabs.onUpdated.addListener(this.chromeTabUpdate);
-		chrome.tabs.getSelected(null, this.chromeTabUpdate);
+		chrome.tabs.getSelected(null, function(tab) {
+			console.log('tab selected:', tab);
+		});
+		chrome.tabs.onSelectionChanged.addListener(function(tabId, selectInfo) {
+			console.log(tabId, selectInfo);
+			chrome.tabs.getSelected(selectInfo.windowId, function(tab) {
+				console.log('tab selected:', tab);
+			});
+			
+			this.chromeTabListener(tabId, selectInfo);
+		});
 	},
 	
-	chromeTabUpdate: function(tab) {
+	chromeTabUpdate: function(tabId, changeInfo, tab) {
+		console.log('tab upadted:', tabId, changeInfo, tab);
 		this.curTab = tab;
 		this.curTabUrl = tab.url;
 		this.curTabFav = tab.favIconUrl;
+		console.log('Got tab url ', tab.url);
 	},
 	
 	chromeTabListener: function(tabId, changeInfo) {
@@ -30,23 +42,24 @@ ParleyBg = {
 	
 	chromeListener: function(request, sender, sendResponse) { 
 		var result = ParleyBg[request.rec](request.msg, sender);
-		sendResponse(result, 'ttt');
+		sendResponse(result);
 	},
 
 	chromeSender: function(rec, message, callback) {
 		chrome.extension.sendRequest({rec: rec, msg: msg}, callback);
 	},
 	
-	blocklist: function() {
-		return this.getStorage('unblocked.hosts');
+	addBlock: function(msg, sender) {
+		lst = blockList.getUnBlock(msg.block.page);
+		if(lst.indexOf(msg.block.host) > 0)
+			msg.block.blocked = false;
+		console.log('adding', msg.block);
+		blockList.setBlock(msg.domain, msg.block);
 	},
 	
-	addBlock: function(block, sender) {
-		blockList.setBlock(block);
-	},
-	
-	getBlockList: function() {
-		return blockList.listForHost(document.domain);
+	getUnblockList: function(domain) {
+		lst = blockList.getUnBlock(domain);
+		return lst;
 	},
 	
 	showPageAction: function(nothing, sender) {
@@ -76,51 +89,58 @@ blockList = {
 	store: {},
 	
 	init: function() {
-		// not a lot
-		this.store['______z'] = {};
 	},
 	
-	listForHost: function(host) {
-		return this.getStorage('unblocked.' + host);
-	},
-	
-	globalUnblock: function() {
+	getGlobalUnblock: function() {
 		return this.getStorage('unblocked.global');
 	},
 	
-	setUnblocked: function(unblk) {
-		curBlocked = ParleyBg.getStorage('unblocked.hosts');
-		for(b in unblk) {
-			if(curBlocked.indexOf(unblk[b]) < 0)
-				curBlocked.push(unblk[b]);
+	rmUnBlock: function(page, url) {
+		var unblockList = this.getUnBlock(page);
+		var pos = unblockList.indexOf(url);
+		if(pos > 0) {
+			unblockList.remove(pos);
+			this.setStorage('unblocklist.' + page, unblockList);
 		}
-		ParleyBg.setStorage('unblocked.hosts', curBlocked);
-		this.store = curBlocked;
 	},
-
-	setBlock: function(block) {
-		if(!this.store.hasOwnProperty(document.domain))
-			this.store[document.domain] = [];
+	
+	setUnBlock: function(page, url) {
+		var unblockList = this.getUnBlock(page);
+		if(unblockList.indexOf(url) < 0) {
+			unblockList.push(url);
+			this.setStorage('unblocklist.' + page, unblockList);
+		}
+	},
+	
+	getUnBlock: function(page) {
+		blkList = this.getStorage('unblocklist.' + page);
+		return (typeof(blkList) == 'undefined') ? [] : blkList;		
+	},
+	
+	// sigh..
+	existsBlock: function(domain, url) {
+		for(b in this.store[domain]) {
+			if(this.store[domain][b].url == url)
+				return true;
+		}
 		
-		this.store[document.domain].push(block);		
-		this.setStorage('blocklist.' + document.domain, this.store[document.domain]);
+		return false;
 	},
 	
-	getBlock: function(host) {
-		blkList = this.getStorage('blocklist.' + document.domain);
+	setBlock: function(domain, block) {
+		if(!this.store.hasOwnProperty(domain))
+			this.store[domain] = [];
+		
+		if(!this.existsBlock(domain, block.url))
+			this.store[domain].push(block);		
+		// this.setStorage('blocklist.' + domain, this.store[domain]);
+	},
+	
+	getBlock: function(domain) {
+		// blkList = this.getStorage('blocklist.' + domain);
+		blkList = this.store[domain];
+		console.log('getBlock', domain, blkList);
 		return (typeof(blkList) == 'undefined') ? {} : blkList;
-	},
-	
-	setBlocked: function(unblk) {
-		curBlocked = ParleyBg.getStorage('unblocked.hosts');
-		for(b in unblk) {
-			if(curBlocked.indexOf(unblk[b]) > 0) {
-				ind = curBlocked.indexOf(unblk[b]);
-				curBlocked.splice(ind, 1);
-			}
-		}
-		ParleyBg.setStorage('unblocked.hosts', curBlocked);
-		this.store = curBlocked;
 	},
 	
 	get_host: function(url) {
@@ -144,6 +164,12 @@ blockList = {
 ParleyBg.init.prototype = ParleyBg;
 blockList.init.prototype = blockList;
 
+// Array Remove - By John Resig (MIT Licensed)
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
+};
 
 // try {
 	// Parley = window.Parley = {};

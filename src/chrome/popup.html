@@ -70,6 +70,9 @@
 	*/
 
 	function get_host (url) {
+		if(typeof(url) == 'undefined')
+			return url;
+			
 		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
 		return url.match(re)[1].toString().toLowerCase();
 	}
@@ -89,7 +92,14 @@
 	function toggleButton(event) {
 		console.log('event', event);
 		var cn = event.target.className;
-		event.target.className = (cn == "") ? 'down' : "";
+		if(cn == "") {
+			chrome.extension.getBackgroundPage().blockList.rmUnBlock(event.target.name, event.target.value);
+			event.target.className = "down";
+		} else {
+			console.log('unblock', event.target);
+			chrome.extension.getBackgroundPage().blockList.setUnBlock(event.target.name, event.target.value);
+			event.target.className = "";
+		}
 	}
 	
 	function unblock() {
@@ -116,13 +126,17 @@
 	}
 	
 	function render_new() {
-		
-		var bl = chrome.extension.getBackgroundPage().blockList.getBlock(document.window);
+		var doc = chrome.extension.getBackgroundPage().ParleyBg.curTabUrl;
+		var bl = chrome.extension.getBackgroundPage().blockList.getBlock(doc);
 		var ht = "";
 		var d_bi = document.getElementById('blocked_items');
 
 		for (bi in bl) {
-			ht += "<p><button>" + get_host(bl[bi].url) + "</button></p>";
+			ht += "<p><button";
+			ht += " value=\"" + get_host(bl[bi].url) + "\"";
+			ht += " name=\"" + bl[bi].page + "\"";
+			ht += (bl[bi].blocked) ? " class=\"down\"" : "";
+			ht += ">" + get_host(bl[bi].url) + "</button></p>";
 		}
 		
 		d_bi.innerHTML = ht;

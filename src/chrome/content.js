@@ -22,18 +22,17 @@
 				this.debugLevel = options.debug;
 			}
 			
-			this.chromeSender('getBlockList', null, function(data, second) {
-				console.log('Got unblockedList', data, second);
-				this.unblockedList = Parley.unblockedList = data;
-			});
+			// this.chromeSender('getUnblockList', document.domain, function(data) {
+			// 	console.log('Got unblockedList', data);
+			// 	this.unblockedList = Parley.unblockedList = data;
+			// });
+			// this.unblockedList = chrome.extension.getBackgroundPage().blockList.getUnBlock(document.domain);
 			document.addEventListener("beforeload", this.evLoadFilter, true);
 		},
 
 		chromeSender: function(rec, msg, cb) {
-			(typeof cb != 'function')
-				cb = function() { };
 			msg = msg || "";
-			console.log('sending', msg);
+			cb = (typeof cb == 'undefined') ? function(x){return x;} : cb;
 			chrome.extension.sendRequest({rec: rec, msg: msg}, cb);
 		},
 		
@@ -42,47 +41,39 @@
 		},
 		
 		filterCheck: function (event) {
-			
 			if(this.policyMatch(event.url)) {
 				
-				if(this.isUnBlocked(event.url))
+				blocked = this.isBlocked(event.url);
+				this.chromeSender('showPageAction');
 
-					console.log('blocked ', event);
-					
-					// @todo - more agressive blocking
-					
-					// event.target.src='about:blank';
-					// event.target.parentElement.removeChild(event.target);	
-					// host = this.get_host(event.url);
-					// if(!this.blockedList.hasOwnProperty(event.url)) {
-
-					var blockEvent = { 
-						url: event.url,
-						type: event.target.nodeName,
-						html: event.target.outerHTML,
-						blocked: false
-					};
-					this.chromeSender('addBlock', blockEvent, function () { });
-					this.chromeSender('showPageAction');
-					event.preventDefault();
-
-				// }
+				// event.target.src='about:blank';
+				// event.target.parentElement.removeChild(event.target);	
+				event.preventDefault();
+						
+				var blockEvent = { 
+					url: event.url,
+					host: this.get_host(event.url),
+					type: event.target.nodeName,
+					html: event.target.outerHTML,
+					blocked: blocked,
+					page: document.domain
+				};
+				this.chromeSender('addBlock', {block: blockEvent, host: document.domain}, function () { });
 				
 			}
-			
 		},
 		
-		isUnBlocked: function(url) {
-			if(this.unblockedList  == null || !this.unblockedList instanceof Object)
-				return false;
+		isBlocked: function(url) {
+			// console.log('comparing', this.get_host(url), this.unblockedList);
 				
-			console.log(this.unblockedList);
-			
-			if(this.unblockedList.indexOf(this.get_host(event.url)) > 0) {
+			if(this.unblockedList  == null || !this.unblockedList instanceof Object)
 				return true;
+			
+			if(this.unblockedList.indexOf(this.get_host(url)) > 0) {
+				return false;
 			}
 			
-			return false;
+			return true;
 		},
 		
 		/**
