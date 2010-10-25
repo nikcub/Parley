@@ -50,14 +50,6 @@ ParleyBg = {
 		blockList[document.domain] = bock;
 	},
 	
-	echo: function(test) {
-		return test;
-	},
-	
-	getTest: function(test) {
-		return 'test message';
-	},
-	
 	getBlockList: function() {
 		console.log('Called getBlockList');
 		console.log(blockList.listForHost(document.domain));
