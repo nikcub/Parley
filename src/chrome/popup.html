@@ -134,22 +134,15 @@
 		haveOther = 0;
 		
 		for(block in bl) {
-			console.log('gpt', bl[block]);
 			
-		}
-		
-		return null;
-		
-		for(block in bl) {
 			tmp = "";
 			tmp += "<li>";
 			tmp += "<input type=\"checkbox\" name=\"list\" ";
 			if(bl[block].blocked == false) {
 				tmp+= " CHECKED ";
 			}
-			console.log('blo?', bl[block]);
-			tmp += " value=\"" + get_host(block) + "\"> ";
-			tmp += get_host(block).substr(0, 24);
+			tmp += " value=\"" + get_host(bl[block].url) + "\"> ";
+			tmp += get_host(bl[block].url).substr(0, 24);
 			tmp += "</li>";
 			count++;
 			

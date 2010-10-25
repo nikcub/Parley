@@ -59,7 +59,8 @@
 					var blockEvent = { 
 						url: event.url,
 						type: event.target.nodeName,
-						html: event.target.outerHTML
+						html: event.target.outerHTML,
+						blocked: false
 					};
 					this.chromeSender('addBlock', blockEvent, function () { });
 					this.chromeSender('showPageAction');
