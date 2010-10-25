@@ -127,7 +127,7 @@
 	
 	function render_new() {
 		var doc = chrome.extension.getBackgroundPage().ParleyBg.curTabUrl;
-		var bl = chrome.extension.getBackgroundPage().blockList.getBlock(doc);
+		var bl = chrome.extension.getBackgroundPage().blockList.getBlock(get_host(doc));
 		var ht = "";
 		var d_bi = document.getElementById('blocked_items');
 

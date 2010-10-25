@@ -12,28 +12,23 @@ ParleyBg = {
 	curTabUrl: null,
 	curTabFav: null,
 	
+	// @todo  clean this mess up (point all to chromeTabUpdate)
 	init: function() {
 		chrome.extension.onRequest.addListener(this.chromeListener);
 		chrome.tabs.onUpdated.addListener(this.chromeTabUpdate);
-		chrome.tabs.getSelected(null, function(tab) {
-			console.log('tab selected:', tab);
-		});
+		chrome.tabs.getSelected(null, ParleyBg.chromeTabUpdate);
 		chrome.tabs.onSelectionChanged.addListener(function(tabId, selectInfo) {
-			console.log(tabId, selectInfo);
-			chrome.tabs.getSelected(selectInfo.windowId, function(tab) {
-				console.log('tab selected:', tab);
-			});
-			
-			this.chromeTabListener(tabId, selectInfo);
+			chrome.tabs.getSelected(selectInfo.windowId, ParleyBg.chromeTabUpdate);
 		});
 	},
 	
-	chromeTabUpdate: function(tabId, changeInfo, tab) {
-		console.log('tab upadted:', tabId, changeInfo, tab);
-		this.curTab = tab;
-		this.curTabUrl = tab.url;
-		this.curTabFav = tab.favIconUrl;
-		console.log('Got tab url ', tab.url);
+	chromeTabUpdate: function(tab) {
+		if(typeof(tab) !== 'undefined' && typeof(tab.url) !== 'undefined') {
+			ParleyBg.curTab = tab;
+			ParleyBg.curTabUrl = tab.url;
+			ParleyBg.curTabFav = tab.favIconUrl;
+			console.log('chromeTabUpdat:', ParleyBg.curTabUrl);
+		}
 	},
 	
 	chromeTabListener: function(tabId, changeInfo) {
@@ -53,8 +48,8 @@ ParleyBg = {
 		lst = blockList.getUnBlock(msg.block.page);
 		if(lst.indexOf(msg.block.host) > 0)
 			msg.block.blocked = false;
-		console.log('adding', msg.block);
-		blockList.setBlock(msg.domain, msg.block);
+		// console.log('addBlock:', msg.block.page, msg.block);
+		blockList.setBlock(msg.block.page, msg.block);
 	},
 	
 	getUnblockList: function(domain) {
@@ -131,15 +126,16 @@ blockList = {
 		if(!this.store.hasOwnProperty(domain))
 			this.store[domain] = [];
 		
-		if(!this.existsBlock(domain, block.url))
-			this.store[domain].push(block);		
-		// this.setStorage('blocklist.' + domain, this.store[domain]);
+		if(!this.existsBlock(domain, block.url)) {
+			this.store[domain].push(block);	
+			// console.log('setBlock:', domain, block);
+		}	
 	},
 	
 	getBlock: function(domain) {
 		// blkList = this.getStorage('blocklist.' + domain);
 		blkList = this.store[domain];
-		console.log('getBlock', domain, blkList);
+		console.log('getBlock:', domain, blkList);
 		return (typeof(blkList) == 'undefined') ? {} : blkList;
 	},
 	
