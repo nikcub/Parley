@@ -1,6 +1,6 @@
 {
 	"name": "Parley",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Blocks third-party requests and cookies for a cleaner, safer and more private web experience",
 	"background_page": "background.html",
 	"options_page": "options.html",
