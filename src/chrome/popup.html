@@ -116,8 +116,9 @@
 	
 	function render() {
 		
-		bl = chrome.extension.getBackgroundPage().getBlockList();
+		bl = chrome.extension.getBackgroundPage().blockList.listForHost(document.window);
 		console.log(bl);
+		
 		count = 0;
 		
 		console.log('block list', bl);

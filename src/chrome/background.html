@@ -47,17 +47,15 @@ ParleyBg = {
 	},
 	
 	addBlock: function(block, sender) {
-		blockList[document.domain] = bock;
+		blockList.setBlock(block);
 	},
 	
 	getBlockList: function() {
-		console.log('Called getBlockList');
 		console.log(blockList.listForHost(document.domain));
 		return blockList.listForHost(document.domain);
 	},
 	
 	showPageAction: function(nothing, sender) {
-		console.log('got show page action', nothing, sender);
 		chrome.pageAction.show(sender.tab.id);
 	},
 	
@@ -106,6 +104,10 @@ blockList = {
 		this.store = curBlocked;
 	},
 
+	setBlock: function(block) {
+		this.store[document.domain] = block;
+	},
+	
 	setBlocked: function(unblk) {
 		curBlocked = ParleyBg.getStorage('unblocked.hosts');
 		for(b in unblk) {
@@ -138,6 +140,10 @@ blockList = {
 
 ParleyBg.init.prototype = ParleyBg;
 blockList.init.prototype = blockList;
+
+function getBlockList() {
+	return blockList;
+}
 
 // try {
 	// Parley = window.Parley = {};
