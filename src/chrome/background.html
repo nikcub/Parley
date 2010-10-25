@@ -100,6 +100,12 @@ blockList = {
 
 	setBlock: function(block) {
 		this.store[document.domain] = block;
+		this.setStorage('blocklist.' + document.domain, block);
+	},
+	
+	getBlock: function(host) {
+		blkList = this.getStorage('blocklist.' + document.domain);
+		return (typeof(blkList) == 'undefined') ? {} : blkList;
 	},
 	
 	setBlocked: function(unblk) {
