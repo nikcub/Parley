@@ -2,7 +2,7 @@
 <head>
 <style>
 	body {
-		width: 320px;
+		width: 170px;
 		font-family: Helvetica, Arial, sans-serif;
 		font-size: 11px;
 		letter-spacing: 0.5px;
@@ -87,6 +87,7 @@
 	}
 	
 	function toggleButton(event) {
+		console.log('event', event);
 		var cn = event.target.className;
 		event.target.className = (cn == "") ? 'down' : "";
 	}
@@ -112,6 +113,30 @@
 		chrome.extension.getBackgroundPage().tabRefresh();
 		window.close();
 		return false;
+	}
+	
+	function render_new() {
+		
+		var bl = chrome.extension.getBackgroundPage().blockList.getBlock(document.window);
+		var ht = "";
+		var d_bi = document.getElementById('blocked_items');
+
+		for (bi in bl) {
+			ht += "<p><button>" + get_host(bl[bi].url) + "</button></p>";
+		}
+		
+		d_bi.innerHTML = ht;
+		
+		// bind events to buttons
+		
+		var buttons = document.getElementsByTagName('button');		
+		for (btn in buttons) {
+			buttons[btn].onclick = toggleButton;
+			if (buttons[btn].captureEvents) {
+				buttons[btn].captureEvents(Event.CLICK);
+			}
+		}
+
 	}
 	
 	function render() {
@@ -192,8 +217,7 @@
 	
 </script>
 </head>
-<body onload="render()">
-	<p><b><span id="count"></span> 3rd-Party Items Found:</b></p>
+<body onload="render_new()">
 	<p>The following items on this page were blocked from loading. Click on an item to toggle blocking.</p>
 	<div id="blocked_items">
 		
