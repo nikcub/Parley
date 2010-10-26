@@ -31,10 +31,17 @@ The latest stable build is always at this address:
 If you have any todo suggestions, email me on nikcub at gmail. After content blocking, I will be adding features to block cookie setting, anonymizing requests with proxy servers, etc. The intention is to make Parley a general privacy plugin.
 
 @TODO backwards-compat third-party cookie blocking. ie. if you check 'block third party cookies' from now, it will still send the old already set cookies. write a function to take intersection of chrome.history and chrome.cookie to rm third-party cookies
+
 @TODO options page
+
 @todo options - settings showing common unblock rules by type and by site (eg. disqus, facebook, digg etc. show buttons/etc.)
+
 @TODO options - more options to unblock certain types of content
+
 @TODO options - unblock entire sites/domains
+
 @TODO options - always block cookies for css
+
 @TODO malware lookups on other DBs
+
 @TODO cookie cleaning and common-sense blocking1
