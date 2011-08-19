@@ -1,9 +1,10 @@
 {
 	"name": "Parley",
-	"version": "0.0.2",
+	"version": "2",
 	"description": "Blocks third-party requests and cookies for a cleaner, safer and more private web experience",
 	"background_page": "background.html",
 	"options_page": "options.html",
+	"update_url": "http://nikcub.appspot.com/projects/parley/updates.xml",
 	"permissions": ["cookies", "tabs", "http://*/*", "https://*/*"],
 	"content_scripts": [
 		{

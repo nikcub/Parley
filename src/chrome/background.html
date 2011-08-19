@@ -20,6 +20,7 @@ ParleyBg = {
 		chrome.tabs.onSelectionChanged.addListener(function(tabId, selectInfo) {
 			chrome.tabs.getSelected(selectInfo.windowId, ParleyBg.chromeTabUpdate);
 		});
+		chrome.tabs.onCreated.addListener(this.chromeTabUpdate);
 	},
 	
 	chromeTabUpdate: function(tab) {
